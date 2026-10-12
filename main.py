@@ -50,7 +50,7 @@ def send_telegram_notification(status, old_due, new_due) -> bool:
         masked = EMAIL[:2] + '****'
     now = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time() + 8 * 3600))
     return send_telegram_text(
-        f"🎉 HidenCloud 续期通知\n\n{status}\n"
+        f"🇺🇸 HidenCloud 续期通知\n\n{status}\n"
         f"👤 账号: {masked}\n📅 续期前到期：{old_due}\n📅 续期后到期：{new_due}\n🕒 续期时间：{now}")
 
 # ---------- 常用选择器（CDP 模式：CSS + :contains("文本")）----------
