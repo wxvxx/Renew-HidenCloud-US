@@ -48,7 +48,7 @@ jobs:
           COOKIE_VALUE: ${{ secrets.COOKIE_VALUE }}
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python -u app.py
+        run: xvfb-run --auto-servernum python -u main.py
 
       # 更新时间到time.txt,避免6个月未更新导致工作流暂停
       - name: 🕒 更新时间
