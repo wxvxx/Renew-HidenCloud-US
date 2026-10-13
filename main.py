@@ -162,11 +162,10 @@ def wait_first_visible(sb, selectors, timeout=10) -> bool:
         time.sleep(0.5)
 
 def click_first_visible(sb, selectors, timeout=10, tag="") -> bool:
-    """点击第一个能点的元素：先直接 sb.click（自带等待），不行再用 JS 点"""
     for sel in selectors:
         try:
             sb.click('button[type="submit"]')
-            print(f"🖱️ 已点击 {tag or sel}")
+            print("✅ Pay 按钮已点击")
             return True
         except Exception:
             continue
@@ -487,7 +486,7 @@ def renew_service(sb, service_url):
         if service_url not in (sb.get_current_url() or ""):
             sb.open(service_url)
         time.sleep(18)
-        print("⏳ 等待服务页加载完成（Renew 是弹窗按钮，脚本没就绪时点了没反应）...")
+        print("⏳ 等待服务页完全加载...")
         close_cookie_consent(sb)    # Cookie 窗口会盖住页面，先关掉
         wait_page_scripts(sb, timeout=30)
         sb.sleep(5)
@@ -504,7 +503,7 @@ def renew_service(sb, service_url):
                            reopen=lambda: open_renew_modal(sb)):
             print("✅ 弹窗 Turnstile 已通过")
         else:
-            print("⚠️ 弹窗 Turnstile 未确认通过，仍尝试提交（失败请查看截图）")
+            print("⚠️ 弹窗 Turnstile 未确认通过，仍尝试提交")
             shot(sb, "turnstile_not_passed.png")
 
         print("🖱️ 点击 'Create Invoice'...")
@@ -537,13 +536,12 @@ def renew_service(sb, service_url):
         if (sb.get_current_url() or "") != new_invoice_url:
             sb.open(new_invoice_url)
 
-        print("🔎 查找 'Pay' 按钮...")
+        print("🔎 查找 Pay 按钮...")
         close_cookie_consent(sb)    # 发票页也可能弹 Cookie 窗口
         if not click_first_visible(sb, PAY_SELECTORS, timeout=30, tag="Pay"):
-            print("❌ 没找到可点的 'Pay' 按钮")
+            print("❌ 没找到可点的 Pay 按钮")
             shot(sb, "pay_button_failed.png")
             return False
-        print("✅ 'Pay' 按钮已点击。")
 
         time.sleep(5)
         sb.open(service_url)
