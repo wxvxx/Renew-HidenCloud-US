@@ -165,7 +165,7 @@ def click_first_visible(sb, selectors, timeout=10, tag="") -> bool:
     """点击第一个能点的元素：先直接 sb.click（自带等待），不行再用 JS 点"""
     for sel in selectors:
         try:
-            sb.click(sel, timeout=min(timeout, 8))
+            sb.click('button[type="submit"]')
             print(f"🖱️ 已点击 {tag or sel}")
             return True
         except Exception:
