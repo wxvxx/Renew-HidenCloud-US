@@ -41,7 +41,7 @@ def send_telegram_text(text) -> bool:
         print(f"❌ Telegram 通知异常: {e}")
     return False
 
-def send_telegram_notification(status, old_due, new_due) -> bool:
+def send_telegram_notification(status, old_due, new_due, curt_ip) -> bool:
     """续期结果通知"""
     if '@' in EMAIL:
         name, domain = EMAIL.split('@', 1)
@@ -51,7 +51,7 @@ def send_telegram_notification(status, old_due, new_due) -> bool:
     now = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time() + 8 * 3600))
     return send_telegram_text(
         f"🇺🇸 HidenCloud 续期通知\n\n{status}\n"
-        f"👤 账号: {masked}\n📅 续期前到期：{old_due}\n📅 续期后到期：{new_due}\n🕒 续期时间：{now}")
+        f"👤 账号: {masked}\n📅 续期前到期：{old_due}\n📅 续期后到期：{new_due}\n🌐 续期使用IP: {curt_ip}\n🕒 续期时间：{now}")
 
 # ---------- 常用选择器（CDP 模式：CSS + :contains("文本")）----------
 USERNAME_SEL = 'input[name="username"], input[name="email"]'
@@ -486,7 +486,7 @@ def renew_service(sb, service_url):
         print("➡ 进入续期流程...")
         if service_url not in (sb.get_current_url() or ""):
             sb.open(service_url)
-
+        time.sleep(18)
         print("⏳ 等待服务页加载完成（Renew 是弹窗按钮，脚本没就绪时点了没反应）...")
         close_cookie_consent(sb)    # Cookie 窗口会盖住页面，先关掉
         wait_page_scripts(sb, timeout=30)
@@ -510,7 +510,7 @@ def renew_service(sb, service_url):
         print("🖱️ 点击 'Create Invoice'...")
         close_cookie_consent(sb)    # 防止 Cookie 窗口盖住弹窗按钮
         click_first_visible(sb, CREATE_INVOICE_SELECTORS, timeout=15, tag="Create Invoice")
-
+        time.sleep(5)
         # 等待跳转发票页；若又出现验证，重新处理后补提交一次
         new_invoice_url = None
         start_wait = time.time()
@@ -585,12 +585,13 @@ def main():
             print("✅ 浏览器已启动")
             try:
                 sb.open("https://api.ip.sb/ip")
-                print(f"🌐 当前出口真实 IP: {sb.get_text('body').strip()}")
+                curt_ip = sb.get_text('body').strip()
+                print(f"🌐 当前出口真实 IP: {curt_ip}")
             except Exception as e:
                 print(f"⚠️ 出口 IP 检测失败: {e}")
 
             # ----- 第一阶段：过登录页前的 Cloudflare 安全验证 -----
-            print("🌐 正在访问目标网站...")
+            print("🌐 正在访问网站...")
             sb.activate_cdp_mode(LOGIN_URL)
             sb.sleep(6)
             sb.solve_captcha()
@@ -647,7 +648,7 @@ def main():
                 sb.sleep(2)
                 print("🖱️ 点击登录按钮提交登录...")
                 sb.click(SUBMIT_SEL)
-                sb.sleep(6)
+                sb.sleep(5)
                 sb.open(BASE_URL + "dashboard")
                 sb.sleep(6)
                 if "/auth/login" in (sb.get_current_url() or ""):
@@ -688,7 +689,7 @@ def main():
                 print(f"📆 续费后到期时间：{new_due}")
                 status = "✅ 续期成功"
 
-            send_telegram_notification(status, old_due, new_due)
+            send_telegram_notification(status, old_due, new_due, curt_ip)
             print("✅ 所有任务完成。")
             sys.exit(0 if renew_result is not False else 1)
 
